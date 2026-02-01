@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx shadcn@latest init:*)",
+      "Bash(npx create-next-app@latest:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(npm install:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\ndocs: update README with comprehensive project documentation\n\n- Add project overview and features section\n- Document tech stack and prerequisites\n- Include installation and setup instructions\n- Add environment variables reference table\n- Document deployment options for Vercel\n- Add project structure overview\n- Include acknowledgments for third-party services\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)"
+    ]
+  }
+}
