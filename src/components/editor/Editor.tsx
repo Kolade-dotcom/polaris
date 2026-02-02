@@ -98,10 +98,10 @@ export function Editor({ projectId }: EditorProps) {
     }
   };
 
-  // Combine language extension with theme extension
-  const extensions = activeTab
-    ? [getLanguageExtension(activeTab.language), editorTheme]
-    : [editorTheme];
+  // Get language extension
+  const languageExtension = activeTab
+    ? getLanguageExtension(activeTab.language)
+    : javascript();
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -137,8 +137,8 @@ export function Editor({ projectId }: EditorProps) {
           <CodeMirror
             value={activeTab.content}
             height="100%"
-            theme="none"
-            extensions={extensions}
+            theme={editorTheme}
+            extensions={[languageExtension]}
             onChange={handleContentChange}
             className="h-full text-sm"
             basicSetup={{
