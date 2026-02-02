@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useQuery } from "convex/react";
-import type { api } from "@convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import {
@@ -99,10 +99,13 @@ function getChildren(files: FileNode[], parentId: Id<"files">): FileNode[] {
 }
 
 export function FileExplorer({ projectId }: FileExplorerProps) {
+  // Convert branded ProjectId to Convex Id format for the query
+  const convexProjectId = projectId as unknown as Id<"projects">;
+
   // Try to use Convex, fallback to demo data if not configured
   let files: FileNode[] | undefined;
   try {
-    files = useQuery(api.files.list, { projectId });
+    files = useQuery(api.files.list, { projectId: convexProjectId });
   } catch (e) {
     // Convex not configured, use demo data
     files = demoFiles;
@@ -124,6 +127,14 @@ export function FileExplorer({ projectId }: FileExplorerProps) {
     });
   }, []);
 
+  const handleNewFile = useCallback(() => {
+    console.log("New file clicked - not implemented yet");
+  }, []);
+
+  const handleNewFolder = useCallback(() => {
+    console.log("New folder clicked - not implemented yet");
+  }, []);
+
   const rootFiles = files ? buildTree(files) : [];
 
   return (
@@ -134,10 +145,22 @@ export function FileExplorer({ projectId }: FileExplorerProps) {
           Explorer
         </span>
         <div className="flex gap-1">
-          <Button variant="ghost" size="icon" className="h-6 w-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            onClick={handleNewFile}
+            title="New File"
+          >
             <FilePlus className="h-3.5 w-3.5" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-6 w-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            onClick={handleNewFolder}
+            title="New Folder"
+          >
             <FolderPlus className="h-3.5 w-3.5" />
           </Button>
         </div>
@@ -190,6 +213,22 @@ function FileTreeNode({
   const children = isFolder ? getChildren(files, file._id) : [];
   const paddingLeft = level * 12 + 8;
 
+  const handleNewFile = useCallback(() => {
+    console.log("New file in folder:", file.name);
+  }, [file.name]);
+
+  const handleNewFolder = useCallback(() => {
+    console.log("New folder in folder:", file.name);
+  }, [file.name]);
+
+  const handleRename = useCallback(() => {
+    console.log("Rename:", file.name);
+  }, [file.name]);
+
+  const handleDelete = useCallback(() => {
+    console.log("Delete:", file.name);
+  }, [file.name]);
+
   return (
     <div>
       <ContextMenu>
@@ -226,21 +265,21 @@ function FileTreeNode({
         <ContextMenuContent>
           {isFolder ? (
             <>
-              <ContextMenuItem>
+              <ContextMenuItem onClick={handleNewFile}>
                 <FilePlus className="h-4 w-4 mr-2" />
                 New File
               </ContextMenuItem>
-              <ContextMenuItem>
+              <ContextMenuItem onClick={handleNewFolder}>
                 <FolderPlus className="h-4 w-4 mr-2" />
                 New Folder
               </ContextMenuItem>
             </>
           ) : null}
-          <ContextMenuItem>
+          <ContextMenuItem onClick={handleRename}>
             <Edit3 className="h-4 w-4 mr-2" />
             Rename
           </ContextMenuItem>
-          <ContextMenuItem className="text-destructive">
+          <ContextMenuItem className="text-destructive" onClick={handleDelete}>
             <Trash2 className="h-4 w-4 mr-2" />
             Delete
           </ContextMenuItem>

@@ -489,7 +489,7 @@ function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
             <div>
               <CardTitle className="text-lg">
                 <Link
-                  href={`/projects/${project._id}`}
+                  href={`/projects/${String(project._id)}`}
                   className="hover:text-coral transition-colors"
                 >
                   {project.name}
