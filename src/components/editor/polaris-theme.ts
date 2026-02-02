@@ -1,5 +1,8 @@
 import { createTheme } from "@uiw/codemirror-themes";
 
+// Font stack with JetBrains Mono as primary
+const jetbrainsMono = '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
+
 /**
  * Polaris Light Theme - Matches the site's warm, minimal aesthetic
  * Uses coral (#E07B53) as the accent color
@@ -16,6 +19,7 @@ export const polarisLight = createTheme({
     gutterBackground: "#FAFAF9",
     gutterForeground: "#78716C",
     gutterActiveForeground: "#1C1917",
+    fontFamily: jetbrainsMono,
   },
   styles: [
     { tag: ["comment", "lineComment", "blockComment"], color: "#A8A29E", fontStyle: "italic" },
@@ -58,6 +62,7 @@ export const polarisDark = createTheme({
     gutterBackground: "#0C0A09",
     gutterForeground: "#A8A29E",
     gutterActiveForeground: "#FAFAF9",
+    fontFamily: jetbrainsMono,
   },
   styles: [
     { tag: ["comment", "lineComment", "blockComment"], color: "#78716C", fontStyle: "italic" },

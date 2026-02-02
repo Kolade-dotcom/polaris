@@ -52,7 +52,7 @@ const getLanguageExtension = (language: string) => {
 };
 
 export function Editor({ projectId }: EditorProps) {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const [tabs, setTabs] = useState<Tab[]>([
     {
       id: "1",
@@ -74,7 +74,7 @@ export function Editor({ projectId }: EditorProps) {
   const activeTab = tabs.find((t) => t.id === activeTabId);
 
   // Use Polaris theme by default (matches site UI), fallback to appropriate theme
-  const editorTheme = theme === "dark" ? polarisDark : polarisLight;
+  const editorTheme = resolvedTheme === "dark" ? polarisDark : polarisLight;
 
   const handleContentChange = useCallback(
     (value: string) => {
@@ -97,6 +97,11 @@ export function Editor({ projectId }: EditorProps) {
       setActiveTabId(newTabs[0].id);
     }
   };
+
+  // Combine language extension with theme extension
+  const extensions = activeTab
+    ? [getLanguageExtension(activeTab.language), editorTheme]
+    : [editorTheme];
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -127,15 +132,15 @@ export function Editor({ projectId }: EditorProps) {
       </div>
 
       {/* Editor Area */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden cm-wrapper">
         {activeTab ? (
           <CodeMirror
             value={activeTab.content}
             height="100%"
-            theme={editorTheme}
-            extensions={[getLanguageExtension(activeTab.language)]}
+            theme="none"
+            extensions={extensions}
             onChange={handleContentChange}
-            className="h-full text-sm font-mono"
+            className="h-full text-sm"
             basicSetup={{
               lineNumbers: true,
               highlightActiveLineGutter: true,
