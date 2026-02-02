@@ -28,10 +28,11 @@ export function IDELayout({ sidebar, editor, aiPanel }: IDELayoutProps) {
       />
 
       {/* Resizable Panels */}
-      <PanelGroup direction="horizontal" className="flex-1">
+      <PanelGroup direction="horizontal" className="flex-1" autoSaveId="ide-layout">
         {/* File Explorer Sidebar */}
         <Panel
-          defaultSize={25}
+          id="sidebar"
+          defaultSize={30}
           minSize={15}
           maxSize={40}
           className="bg-card border-r border-border"
@@ -43,7 +44,7 @@ export function IDELayout({ sidebar, editor, aiPanel }: IDELayoutProps) {
         <PanelResizeHandle className="w-1.5 bg-border hover:bg-coral transition-colors cursor-ew-resize relative z-10" />
 
         {/* Editor Area */}
-        <Panel defaultSize={aiPanel ? 50 : 75} minSize={30}>
+        <Panel id="editor" defaultSize={40} minSize={25} maxSize={70}>
           {editor}
         </Panel>
 
@@ -53,6 +54,7 @@ export function IDELayout({ sidebar, editor, aiPanel }: IDELayoutProps) {
             {/* Resize Handle - Editor to AI Panel */}
             <PanelResizeHandle className="w-1.5 bg-border hover:bg-coral transition-colors cursor-ew-resize relative z-10" />
             <Panel
+              id="ai-panel"
               defaultSize={30}
               minSize={20}
               maxSize={45}
