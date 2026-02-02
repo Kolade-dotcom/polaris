@@ -3,8 +3,8 @@
 import { ReactNode } from "react";
 import {
   Panel,
-  PanelGroup,
-  PanelResizeHandle,
+  Group as PanelGroup,
+  Separator as PanelResizeHandle,
 } from "react-resizable-panels";
 
 interface IDELayoutProps {

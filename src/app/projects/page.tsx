@@ -42,11 +42,12 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { formatDistanceToNow } from "@/lib/utils";
+import type { Id } from "@convex/_generated/dataModel";
 
 // Demo projects for when Convex is not configured
 const demoProjects = [
   {
-    _id: "demo-1",
+    _id: "demo-1" as Id<"projects">,
     _creationTime: Date.now(),
     name: "Demo Project",
     description: "This is a demo project. Convex is not configured yet.",
@@ -57,6 +58,8 @@ const demoProjects = [
 
 export default function ProjectsPage() {
   const { user } = useUser();
+
+  // Create dialog state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -66,16 +69,37 @@ export default function ProjectsPage() {
     language: "typescript",
   });
 
+  // Rename dialog state
+  const [isRenameOpen, setIsRenameOpen] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameError, setRenameError] = useState<string | null>(null);
+  const [projectToRename, setProjectToRename] = useState<{
+    _id: Id<"projects">;
+    name: string;
+    description?: string;
+  } | null>(null);
+  const [renameForm, setRenameForm] = useState({ name: "", description: "" });
+
+  // Delete dialog state
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [projectToDelete, setProjectToDelete] = useState<{
+    _id: Id<"projects">;
+    name: string;
+  } | null>(null);
+
   // Try to use Convex, fallback to demo data if not configured
   let projects;
   try {
     projects = useQuery(api.projects.list);
   } catch (e) {
-    // Convex not configured, use demo data
     projects = demoProjects;
   }
 
   const createProject = useMutation(api.projects.create);
+  const updateProject = useMutation(api.projects.update);
+  const deleteProject = useMutation(api.projects.remove);
 
   const convexConfigured = process.env.NEXT_PUBLIC_CONVEX_URL &&
     !process.env.NEXT_PUBLIC_CONVEX_URL.includes("127.0.0.1");
@@ -99,6 +123,63 @@ export default function ProjectsPage() {
       setCreateError(error instanceof Error ? error.message : "Failed to create project");
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const openRenameDialog = (project: {
+    _id: Id<"projects">;
+    name: string;
+    description?: string;
+  }) => {
+    setProjectToRename(project);
+    setRenameForm({ name: project.name, description: project.description || "" });
+    setRenameError(null);
+    setIsRenameOpen(true);
+  };
+
+  const handleRenameProject = async () => {
+    if (!projectToRename || !renameForm.name.trim()) return;
+
+    setIsRenaming(true);
+    setRenameError(null);
+
+    try {
+      await updateProject({
+        id: projectToRename._id,
+        name: renameForm.name.trim(),
+        description: renameForm.description.trim() || undefined,
+      });
+
+      setIsRenameOpen(false);
+      setProjectToRename(null);
+    } catch (error) {
+      setRenameError(error instanceof Error ? error.message : "Failed to rename project");
+    } finally {
+      setIsRenaming(false);
+    }
+  };
+
+  const openDeleteDialog = (project: { _id: Id<"projects">; name: string }) => {
+    setProjectToDelete(project);
+    setDeleteError(null);
+    setIsDeleteOpen(true);
+  };
+
+  const handleDeleteProject = async () => {
+    if (!projectToDelete) return;
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      await deleteProject({ id: projectToDelete._id });
+
+      setIsDeleteOpen(false);
+      setProjectToDelete(null);
+    } catch (error) {
+      setDeleteError(error instanceof Error ? error.message : "Failed to delete project");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -265,27 +346,138 @@ export default function ProjectsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map((project) => (
-              <ProjectCard key={project._id} project={project} />
+              <ProjectCard
+                key={project._id}
+                project={project}
+                onRename={openRenameDialog}
+                onDelete={openDeleteDialog}
+              />
             ))}
           </div>
         )}
       </main>
+
+      {/* Rename Dialog */}
+      <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rename Project</DialogTitle>
+            <DialogDescription>
+              Update your project name and description
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {renameError && (
+              <div className="p-3 bg-destructive/10 text-destructive rounded-md text-sm">
+                {renameError}
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="rename-name">Project Name</Label>
+              <Input
+                id="rename-name"
+                placeholder="My Awesome Project"
+                value={renameForm.name}
+                onChange={(e) =>
+                  setRenameForm({ ...renameForm, name: e.target.value })
+                }
+                disabled={isRenaming}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="rename-description">Description (optional)</Label>
+              <Textarea
+                id="rename-description"
+                placeholder="A brief description of your project..."
+                value={renameForm.description}
+                onChange={(e) =>
+                  setRenameForm({ ...renameForm, description: e.target.value })
+                }
+                disabled={isRenaming}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsRenameOpen(false)}
+              disabled={isRenaming}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-coral hover:bg-coral/90 gap-2"
+              onClick={handleRenameProject}
+              disabled={!renameForm.name.trim() || isRenaming}
+            >
+              {isRenaming && (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              )}
+              {isRenaming ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Project</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <strong>{projectToDelete?.name}</strong>?
+              This action cannot be undone and all project files will be permanently deleted.
+            </DialogDescription>
+          </DialogHeader>
+          {deleteError && (
+            <div className="p-3 bg-destructive/10 text-destructive rounded-md text-sm">
+              {deleteError}
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteOpen(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteProject}
+              disabled={isDeleting}
+              className="gap-2"
+            >
+              {isDeleting && (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              )}
+              {isDeleting ? "Deleting..." : "Delete Project"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
-function ProjectCard({
-  project,
-}: {
+interface ProjectCardProps {
   project: {
-    _id: string;
+    _id: Id<"projects">;
     _creationTime: number;
     name: string;
     description?: string;
     language?: string;
     updatedAt: number;
   };
-}) {
+  onRename: (project: {
+    _id: Id<"projects">;
+    name: string;
+    description?: string;
+  }) => void;
+  onDelete: (project: { _id: Id<"projects">; name: string }) => void;
+}
+
+function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
   return (
     <Card className="group hover:shadow-lg transition-all">
       <CardHeader className="pb-3">
@@ -320,11 +512,14 @@ function ProjectCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onRename(project)}>
                 <Edit className="h-4 w-4 mr-2" />
                 Rename
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => onDelete(project)}
+              >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
               </DropdownMenuItem>
