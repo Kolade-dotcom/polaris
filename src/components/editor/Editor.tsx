@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { css } from "@codemirror/lang-css";
 import { html } from "@codemirror/lang-html";
 import { json } from "@codemirror/lang-json";
 import { markdown } from "@codemirror/lang-markdown";
-import { oneDark } from "@codemirror/theme-one-dark";
 import { useTheme } from "next-themes";
 import { X, Circle } from "lucide-react";
 import type { ProjectId } from "@/lib/types";
+import { polarisLight, polarisDark } from "./polaris-theme";
 
 interface EditorProps {
   projectId: ProjectId;
@@ -52,6 +52,7 @@ const getLanguageExtension = (language: string) => {
 };
 
 export function Editor({ projectId }: EditorProps) {
+  const { theme } = useTheme();
   const [tabs, setTabs] = useState<Tab[]>([
     {
       id: "1",
@@ -71,6 +72,9 @@ export function Editor({ projectId }: EditorProps) {
   const [activeTabId, setActiveTabId] = useState<string>("1");
 
   const activeTab = tabs.find((t) => t.id === activeTabId);
+
+  // Use Polaris theme by default (matches site UI), fallback to appropriate theme
+  const editorTheme = theme === "dark" ? polarisDark : polarisLight;
 
   const handleContentChange = useCallback(
     (value: string) => {
@@ -128,10 +132,10 @@ export function Editor({ projectId }: EditorProps) {
           <CodeMirror
             value={activeTab.content}
             height="100%"
-            theme={oneDark}
+            theme={editorTheme}
             extensions={[getLanguageExtension(activeTab.language)]}
             onChange={handleContentChange}
-            className="h-full text-sm"
+            className="h-full text-sm font-mono"
             basicSetup={{
               lineNumbers: true,
               highlightActiveLineGutter: true,

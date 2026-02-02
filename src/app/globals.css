@@ -170,3 +170,16 @@
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
+
+/* CodeMirror Editor Font - Use JetBrains Mono */
+.cm-editor {
+  font-family: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+.cm-editor .cm-content {
+  font-family: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+.cm-editor .cm-gutters {
+  font-family: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
