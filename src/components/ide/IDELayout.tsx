@@ -31,21 +31,19 @@ export function IDELayout({ sidebar, editor, aiPanel }: IDELayoutProps) {
       <PanelGroup direction="horizontal" className="flex-1">
         {/* File Explorer Sidebar */}
         <Panel
-          defaultSize={20}
+          defaultSize={25}
           minSize={15}
-          maxSize={35}
+          maxSize={40}
           className="bg-card border-r border-border"
         >
           {sidebar}
         </Panel>
 
         {/* Resize Handle - File Explorer to Editor */}
-        <PanelResizeHandle className="w-2 bg-border hover:bg-coral/50 active:bg-coral transition-colors cursor-col-resize flex items-center justify-center group">
-          <div className="w-0.5 h-8 bg-muted-foreground/30 rounded-full group-hover:bg-coral/70" />
-        </PanelResizeHandle>
+        <PanelResizeHandle className="w-1.5 bg-border hover:bg-coral transition-colors cursor-ew-resize relative z-10" />
 
         {/* Editor Area */}
-        <Panel defaultSize={aiPanel ? 55 : 80} minSize={30}>
+        <Panel defaultSize={aiPanel ? 50 : 75} minSize={30}>
           {editor}
         </Panel>
 
@@ -53,13 +51,11 @@ export function IDELayout({ sidebar, editor, aiPanel }: IDELayoutProps) {
         {aiPanel && (
           <>
             {/* Resize Handle - Editor to AI Panel */}
-            <PanelResizeHandle className="w-2 bg-border hover:bg-coral/50 active:bg-coral transition-colors cursor-col-resize flex items-center justify-center group">
-              <div className="w-0.5 h-8 bg-muted-foreground/30 rounded-full group-hover:bg-coral/70" />
-            </PanelResizeHandle>
+            <PanelResizeHandle className="w-1.5 bg-border hover:bg-coral transition-colors cursor-ew-resize relative z-10" />
             <Panel
-              defaultSize={25}
+              defaultSize={30}
               minSize={20}
-              maxSize={40}
+              maxSize={45}
               className="bg-card border-l border-border"
             >
               {aiPanel}
