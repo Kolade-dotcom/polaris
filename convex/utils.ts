@@ -1,18 +1,19 @@
 import { QueryCtx } from "./_generated/server";
 
+/**
+ * Get the authenticated user's ID from the Convex auth context.
+ * Requires CLERK_ISSUER_URL to be set in Convex environment variables.
+ */
 export async function getAuthUserId(ctx: QueryCtx): Promise<string | null> {
-  // This is a placeholder - in production, you'd verify the Clerk session
-  // and return the actual user ID from the auth context
-  // For now, we'll use a mock implementation that checks a header
-  // In a real implementation, this would use Clerk's auth() helper
+  const identity = await ctx.auth.getUserIdentity();
 
-  // Note: This will be properly implemented when Clerk auth is set up
-  // with Convex. For now, we return null to indicate no user.
+  if (!identity) {
+    console.log("No identity found - auth token may be missing or invalid");
+    return null;
+  }
 
-  // In production with Clerk + Convex:
-  // import { auth } from "@clerk/nextjs/server";
-  // const { userId } = await auth();
-  // return userId;
+  console.log("Auth identity:", { subject: identity.subject, issuer: identity.issuer });
 
-  return null;
+  // The subject is the Clerk user ID
+  return identity.subject;
 }

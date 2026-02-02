@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,7 +38,7 @@ import {
   Clock,
   Trash2,
   Edit,
-  Code2,
+  Sparkles,
   AlertTriangle,
 } from "lucide-react";
 import { formatDistanceToNow } from "@/lib/utils";
@@ -58,6 +58,8 @@ const demoProjects = [
 export default function ProjectsPage() {
   const { user } = useUser();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
   const [newProject, setNewProject] = useState({
     name: "",
     description: "",
@@ -73,23 +75,41 @@ export default function ProjectsPage() {
     projects = demoProjects;
   }
 
+  const createProject = useMutation(api.projects.create);
+
   const convexConfigured = process.env.NEXT_PUBLIC_CONVEX_URL &&
     !process.env.NEXT_PUBLIC_CONVEX_URL.includes("127.0.0.1");
 
   const handleCreateProject = async () => {
-    // TODO: Implement project creation mutation
-    setIsCreateOpen(false);
-    setNewProject({ name: "", description: "", language: "typescript" });
+    if (!newProject.name.trim()) return;
+
+    setIsCreating(true);
+    setCreateError(null);
+
+    try {
+      await createProject({
+        name: newProject.name.trim(),
+        description: newProject.description.trim() || undefined,
+        language: newProject.language,
+      });
+
+      setIsCreateOpen(false);
+      setNewProject({ name: "", description: "", language: "typescript" });
+    } catch (error) {
+      setCreateError(error instanceof Error ? error.message : "Failed to create project");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border">
-        <div className="container flex h-14 items-center justify-between">
+        <div className="container px-4 sm:px-6 lg:px-8 xl:px-12 flex h-14 items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center space-x-2">
-              <Code2 className="h-6 w-6 text-coral" />
+              <Sparkles className="h-6 w-6 text-coral" />
               <span className="font-bold text-lg">Polaris</span>
             </Link>
             <span className="text-muted-foreground">/</span>
@@ -104,7 +124,7 @@ export default function ProjectsPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container py-8">
+      <main className="container px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
         {!convexConfigured && (
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-3">
             <AlertTriangle className="h-5 w-5 text-amber-600" />
@@ -138,6 +158,11 @@ export default function ProjectsPage() {
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
+                {createError && (
+                  <div className="p-3 bg-destructive/10 text-destructive rounded-md text-sm">
+                    {createError}
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="name">Project Name</Label>
                   <Input
@@ -147,6 +172,7 @@ export default function ProjectsPage() {
                     onChange={(e) =>
                       setNewProject({ ...newProject, name: e.target.value })
                     }
+                    disabled={isCreating}
                   />
                 </div>
                 <div className="space-y-2">
@@ -161,17 +187,19 @@ export default function ProjectsPage() {
                         description: e.target.value,
                       })
                     }
+                    disabled={isCreating}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="language">Primary Language</Label>
                   <select
                     id="language"
-                    className="w-full rounded-md border border-input bg-background px-3 py-2"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 disabled:opacity-50"
                     value={newProject.language}
                     onChange={(e) =>
                       setNewProject({ ...newProject, language: e.target.value })
                     }
+                    disabled={isCreating}
                   >
                     <option value="typescript">TypeScript</option>
                     <option value="javascript">JavaScript</option>
@@ -182,15 +210,22 @@ export default function ProjectsPage() {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsCreateOpen(false)}
+                  disabled={isCreating}
+                >
                   Cancel
                 </Button>
                 <Button
-                  className="bg-coral hover:bg-coral/90"
+                  className="bg-coral hover:bg-coral/90 gap-2"
                   onClick={handleCreateProject}
-                  disabled={!newProject.name.trim()}
+                  disabled={!newProject.name.trim() || isCreating}
                 >
-                  Create Project
+                  {isCreating && (
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  )}
+                  {isCreating ? "Creating..." : "Create Project"}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -257,7 +292,7 @@ function ProjectCard({
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-coral/10 text-coral">
-              <Code2 className="h-5 w-5" />
+              <Sparkles className="h-5 w-5" />
             </div>
             <div>
               <CardTitle className="text-lg">

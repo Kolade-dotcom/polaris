@@ -12,7 +12,9 @@ function getConvexClient() {
     console.warn("NEXT_PUBLIC_CONVEX_URL is not set. Convex features will be disabled.");
     return null;
   }
-  return new ConvexReactClient(url);
+  return new ConvexReactClient(url, {
+    verbose: true,
+  });
 }
 
 const convex = getConvexClient();
