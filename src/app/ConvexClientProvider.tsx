@@ -19,6 +19,21 @@ function getConvexClient() {
 
 const convex = getConvexClient();
 
+// Debug wrapper to see what useAuth returns
+function useAuthWithDebug() {
+  const auth = useAuth();
+
+  console.log("Clerk auth state:", {
+    isLoaded: auth.isLoaded,
+    isSignedIn: auth.isSignedIn,
+    userId: auth.userId,
+    hasSession: !!auth.session,
+    hasGetToken: typeof auth.getToken === 'function',
+  });
+
+  return auth;
+}
+
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
   // If Convex is not configured, render children without the provider
   // This allows the app to work in demo mode without Convex
@@ -31,7 +46,7 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+    <ConvexProviderWithClerk client={convex} useAuth={useAuthWithDebug}>
       {children}
     </ConvexProviderWithClerk>
   );
