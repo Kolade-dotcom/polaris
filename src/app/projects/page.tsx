@@ -487,7 +487,7 @@ function ProjectCard({ project, onRename, onDelete }: ProjectCardProps) {
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <CardTitle className="text-lg">
+              <CardTitle className="text-lg cursor-pointer">
                 <Link
                   href={`/projects/${String(project._id)}`}
                   className="hover:text-coral transition-colors"

@@ -12,8 +12,6 @@ export default function ProjectPage() {
   const params = useParams();
   const projectIdParam = params.projectId as string;
 
-  console.log("ProjectPage render - projectId param:", projectIdParam);
-
   if (!projectIdParam) {
     return (
       <div className="h-screen flex items-center justify-center">
