@@ -12,27 +12,11 @@ function getConvexClient() {
     console.warn("NEXT_PUBLIC_CONVEX_URL is not set. Convex features will be disabled.");
     return null;
   }
-  return new ConvexReactClient(url, {
-    verbose: true,
-  });
+  return new ConvexReactClient(url);
 }
 
 const convex = getConvexClient();
 
-// Debug wrapper to see what useAuth returns
-function useAuthWithDebug() {
-  const auth = useAuth();
-
-  console.log("Clerk auth state:", {
-    isLoaded: auth.isLoaded,
-    isSignedIn: auth.isSignedIn,
-    userId: auth.userId,
-    hasSession: !!auth.session,
-    hasGetToken: typeof auth.getToken === 'function',
-  });
-
-  return auth;
-}
 
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
   // If Convex is not configured, render children without the provider
@@ -46,7 +30,7 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ConvexProviderWithClerk client={convex} useAuth={useAuthWithDebug}>
+    <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
       {children}
     </ConvexProviderWithClerk>
   );
